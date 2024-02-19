@@ -1,0 +1,5 @@
+setup.py
+witnesschain.egg-info/PKG-INFO
+witnesschain.egg-info/SOURCES.txt
+witnesschain.egg-info/dependency_links.txt
+witnesschain.egg-info/top_level.txt
