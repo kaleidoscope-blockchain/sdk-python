@@ -33,6 +33,8 @@ PRE_LOGIN_URL	= BASE_URL + "/pre-login"
 TRACE_URL	= BASE_URL + "/trace"
 WEBSOCKET_URL	= BASE_URL_WSS + "/websocket"
 
+USER_INFO_URL	= "https://" + SERVER + ":" + SERVER_PORT + "/all/general/v1/user-info" 
+
 CONTENT_TYPE_JSON = {
 	"content-type" : "application/json"
 }
@@ -43,7 +45,8 @@ class TransactionTracer:
 #
 	def __init__(self, args):
 	#
-		self.sessioni		= None	
+		self.session		= None	
+		self.websocket		= None
 
 		self.role		= args["role"] 
 		self.publicKey		= args["publicKey"] 
@@ -82,11 +85,9 @@ class TransactionTracer:
 		j	= json.loads(r.text.encode())
 		message	= j["result"]["message"]
 
-		print("Got message",message)
-
 		cookies	= s.cookies.get_dict()
 		self.extra_headers = {"cookie" : ";".join(["%s=%s" %(i, j) for i, j in cookies.items()]) }
-		print(self.extra_headers)
+		print("Cookies",r.url,self.extra_headers)
 
 		data = json.dumps ({
 			"signature" : str("0x61e71cbc2ca29fc9c185071301f1d325bcdbbcf24036797bf4263fc0d87b4d2c31dbec44d06305627bc0bb17dd6a56b275a94f188f6f4b5efe7016fbc68ba6e11c")
@@ -105,12 +106,38 @@ class TransactionTracer:
 			print("\n===>",r.status_code,r.url)
 			self.session= None
 			return None
+		cookies	= s.cookies.get_dict()
+		self.extra_headers = {"cookie" : ";".join(["%s=%s" %(i, j) for i, j in cookies.items()]) }
+		print("Cookies",r.url,self.extra_headers)
+
+
+		#"""
+		r = s.post (
+			url	= USER_INFO_URL,
+			verify	=
+ SSL_CONTEXT.check_hostname,
+			data	= data,
+			headers = CONTENT_TYPE_JSON
+		)
+
+		cookies	= s.cookies.get_dict()
+		self.extra_headers = {"cookie" : ";".join(["%s=%s" %(i, j) for i, j in cookies.items()]) }
+		print("Cookies",r.url,self.extra_headers)
+
+		print("\n===>",r.status_code,r.url,r.text)
+
+		if r.status_code != 200:
+			print("\n===>",r.status_code,r.url)
+			self.session= None
+			return None
+		#"""
 
 		self.session = s
 
 		cookies	= s.cookies.get_dict()
 		self.extra_headers = {"cookie" : ";".join(["%s=%s" %(i, j) for i, j in cookies.items()]) }
 
+		print(self.extra_headers)
 		return True
 	#
 
@@ -175,10 +202,12 @@ class TransactionTracer:
 		print("===> About to connect to ...", ws_link)
 
 		async def handle_websockets():
-		#
+		# {
 			print("Connecting to ",ws_link)
 			async with websockets.connect (ws_link, extra_headers = self.extra_headers) as websocket:
-			#
+			# {
+				self.websocket = websocket
+
 				print("===> Connected to websocket")
 				do_ping = True
 				while True:
@@ -221,21 +250,44 @@ class TransactionTracer:
 						continue 
 					
 					if self.role == "app":
-						self.handle_message_as_app(msg)
+						await self.handle_message_as_app(msg)
 					elif self.role == "watchtower":
-						self.handle_message_as_watchtower(msg)
+						await self.handle_message_as_watchtower(msg)
 					else: 
-						assert False	
+						assert False
 
-			#
-		#
+			# }
+		# }
 
 		print("===> Handing ws...")
 		await handle_websockets()
 	#
 
-	def handle_message_as_watchtower (self, msg):
+	async def handle_message_as_watchtower (self, msg):
 	#
-		print("Got",msg);	
+		print("Got",msg);
+
+		chainId		= msg["chainId"]
+		requestId	= msg["requestId"]
+		transactionHash	= msg["transactionHash"]
+
+		await self.websocket.send (
+			json.dumps ({
+				"api"			: "trace-transaction-response",
+				"requestId"		: requestId,
+				"chainId"		: chainId,
+				"transactionHash"	: transactionHash,
+				"result"		: '{"test":"result"}',
+				"signature"		: "test-signature"
+			})
+		)
+
+		try:
+			async with async_timeout.timeout(30):
+				response = await self.websocket.recv()
+				print("GOT RESPONSE",response)
+		except Exception as e:
+			print("GOT some exception",e)
+
 	#
 #
