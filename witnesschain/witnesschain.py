@@ -271,13 +271,33 @@ class TransactionTracer:
 		requestId	= msg["requestId"]
 		transactionHash	= msg["transactionHash"]
 
+		result = json.dumps({
+			"Receipt": {
+				"type": "0x7e",
+				"root": "0x",
+				"status": "0x1",
+				"cumulativeGasUsed": "0xb729",
+				"logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+				"logs": [],
+				"transactionHash": transactionHash,
+				"contractAddress": "0x0000000000000000000000000000000000000000",
+				"gasUsed": "0xb729",
+				"effectiveGasPrice": "0x0",
+				"depositNonce": "0x7c216a",
+				"depositReceiptVersion": "0x1",
+				"blockHash": "0x477d8934cae2daa6b0d72c578dca214513f8837ddf6132ba10ec3ad94ff844ba",
+				"blockNumber": "0x7c216b",
+				"transactionIndex": "0x0"
+			},
+		})
+
 		await self.websocket.send (
 			json.dumps ({
 				"api"			: "trace-transaction-response",
 				"requestId"		: requestId,
 				"chainId"		: chainId,
 				"transactionHash"	: transactionHash,
-				"result"		: '{"test":"result"}',
+				"result"		: result,
 				"signature"		: "test-signature"
 			})
 		)
