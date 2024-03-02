@@ -292,7 +292,7 @@ class TransactionTracer:
 
 		await self.websocket.send (
 			json.dumps ({
-				"api"			: "trace-transaction-response",
+				"api"			: "trace-transaction",
 				"requestId"		: requestId,
 				"chainId"		: chainId,
 				"transactionHash"	: transactionHash,
