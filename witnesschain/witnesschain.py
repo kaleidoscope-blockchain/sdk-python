@@ -74,10 +74,10 @@ class TransactionTracer:
 			headers = CONTENT_TYPE_JSON
 		)
 
-		print("\n===>",r.status_code,r.url)
-
-		if r.status_code != 200:
+		if r.status_code == 200:
 			print("\n===>",r.status_code,r.url)
+		else:
+			print("\n===>",r.status_code,r.url,"\n",r.text)
 			self.session= None
 			return None
 
@@ -87,7 +87,6 @@ class TransactionTracer:
 
 		cookies	= s.cookies.get_dict()
 		self.extra_headers = {"cookie" : ";".join(["%s=%s" %(i, j) for i, j in cookies.items()]) }
-		print("Cookies",r.url,self.extra_headers)
 
 		data = json.dumps ({
 			"signature" : str("0x61e71cbc2ca29fc9c185071301f1d325bcdbbcf24036797bf4263fc0d87b4d2c31dbec44d06305627bc0bb17dd6a56b275a94f188f6f4b5efe7016fbc68ba6e11c")
@@ -100,15 +99,15 @@ class TransactionTracer:
 			headers = CONTENT_TYPE_JSON
 		)
 
-		print("\n===>",r.status_code,r.url)
-
-		if r.status_code != 200:
+		if r.status_code == 200:
 			print("\n===>",r.status_code,r.url)
+		else:
+			print("\n===>",r.status_code,r.url,"\n",r.text)
 			self.session= None
 			return None
+
 		cookies	= s.cookies.get_dict()
 		self.extra_headers = {"cookie" : ";".join(["%s=%s" %(i, j) for i, j in cookies.items()]) }
-		print("Cookies",r.url,self.extra_headers)
 
 
 		#"""
@@ -122,15 +121,13 @@ class TransactionTracer:
 
 		cookies	= s.cookies.get_dict()
 		self.extra_headers = {"cookie" : ";".join(["%s=%s" %(i, j) for i, j in cookies.items()]) }
-		print("Cookies",r.url,self.extra_headers)
 
-		print("\n===>",r.status_code,r.url,r.text)
-
-		if r.status_code != 200:
+		if r.status_code == 200:
 			print("\n===>",r.status_code,r.url)
+		else:
+			print("\n===>",r.status_code,r.url,"\n",r.text)
 			self.session= None
 			return None
-		#"""
 
 		self.session = s
 
@@ -153,8 +150,10 @@ class TransactionTracer:
 
 		print("\n===>",r.status_code,r.url)
 
-		if r.status_code != 200:
+		if r.status_code == 200:
 			print("\n===>",r.status_code,r.url)
+		else:
+			print("\n===>",r.status_code,r.url,"\n",r.text)
 			self.session= None
 			return None
 
@@ -178,12 +177,12 @@ class TransactionTracer:
 				headers = CONTENT_TYPE_JSON
 			)
 
-		if r.status_code != 200:
+		if r.status_code == 200:
 			print("\n===>",r.status_code,r.url)
-			print(r.text)
+		else:
+			print("\n===>",r.status_code,r.url,"\n",r.text)
+			self.session= None
 			return None
-
-		print("tttttttttttttttt",r.text)
 
 		j	= json.loads(r.text.encode())
 		#result	= j["result"]

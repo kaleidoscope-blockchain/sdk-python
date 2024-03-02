@@ -13,9 +13,9 @@ async def main():
 
 	t.login()
 
-	print("Running ...");
+	print("\n===> Running ...");
 	await t.run()
-	print("Done...");
+	print("\n===> Done running...");
 #
 
 if __name__ == "__main__":
