@@ -8,7 +8,7 @@ async def main():
 		"role"			: "watchtower",
 		"keyType"		: "ethereum",
 		"publicKey"		: "0x630391b032F444cB40B3603b579064817f312353",
-		"currentlyWatching"	: "11155420"
+		"currentlyWatching"	: "84532"
 	})
 
 	t.login()

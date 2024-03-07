@@ -1,17 +1,33 @@
+import random
+
 import witnesschain
 
 t = witnesschain.TransactionTracer ({
 	"role"		: "app",
 	"keyType"	: "ethereum",
-	"publicKey"	: "0x09d8A4FFC85833066472aD1BdD5425dC9Cd34376"
+	"publicKey"	: "0x66607777666999966472aD1BdD5425dC9Cd34376"
 })
 
 t.login()
 
-r = t.trace ({
-	"requestId"		: "EEEE",
-	"chainId"		: "11155420",
-	"transactionHash"	: "0x37766f29a5e0f2fa2d8808092f914a2cbfdc3a0727ad8a7395075040cdf6de99",
-})
+for i in range(0,1000):
+#
+	transactionHash = "0x"
+
+	for x in range (0,65):
+		d = random.randint(0,16) 
+		transactionHash += "01234567890abcdef"[d]
+
+	if t.session == None:
+		break
+
+	print("Doing ",i,transactionHash)
+
+	r = t.trace ({
+		"requestId"		: "EEEE",
+		"chainId"		: "84532",
+		"transactionHash"	: transactionHash,
+	})
+#
 
 print(r)

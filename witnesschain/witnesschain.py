@@ -89,7 +89,7 @@ class TransactionTracer:
 		self.extra_headers = {"cookie" : ";".join(["%s=%s" %(i, j) for i, j in cookies.items()]) }
 
 		data = json.dumps ({
-			"signature" : str("0x61e71cbc2ca29fc9c185071301f1d325bcdbbcf24036797bf4263fc0d87b4d2c31dbec44d06305627bc0bb17dd6a56b275a94f188f6f4b5efe7016fbc68ba6e11c")
+			"signature" : "0\x43x61e71cbc2ca29fc9c185071301f1d325bcdbbcf24036797bf4263fc0d87b4d2c31dbec44d06305627bc0bb17dd6a56b275a94f188f6f4b5efe7016fbc68ba6e11c"
 		})
 
 		r = s.post (
@@ -162,27 +162,36 @@ class TransactionTracer:
 
 	def trace(self,req):
 	#
-		print("session",self.session)
 		r = None
-		if self.session:
-			r = self.session.post (
-				url	= TRACE_URL.replace("<role>",self.role),
-				data	= json.dumps(req),
-				headers = CONTENT_TYPE_JSON
-			)
-		else:
-			r = requests.post (
-				url	= TRACE_URL.replace("<role>",self.role),
-				data	= json.dumps(req),
-				headers = CONTENT_TYPE_JSON
-			)
 
-		if r.status_code == 200:
-			print("\n===>",r.status_code,r.url)
-		else:
-			print("\n===>",r.status_code,r.url,"\n",r.text)
-			self.session= None
-			return None
+		for i in [1,2,3,4,5]:
+		# {
+			if self.session:
+				r = self.session.post (
+					url	= TRACE_URL.replace("<role>",self.role),
+					data	= json.dumps(req),
+					headers = CONTENT_TYPE_JSON
+				)
+			else:
+				r = requests.post (
+					url	= TRACE_URL.replace("<role>",self.role),
+					data	= json.dumps(req),
+					headers = CONTENT_TYPE_JSON
+				)
+
+			print("\n===>",r.status_code,r.url,r.text)
+
+			if r.status_code == 200:
+				print("====> After",i,"attempts\n")
+				break
+			if r.status_code == 202:
+				print("====> Retry",i,"\n")
+				continue	
+			else:
+				self.session = None
+				break
+
+		# }
 
 		j	= json.loads(r.text.encode())
 		#result	= j["result"]
@@ -229,9 +238,11 @@ class TransactionTracer:
 							print("GOT MESSAGE===================>",msg)
 					except asyncio.exceptions.TimeoutError:
 						do_ping = True
+						print("GOT timeoutException")
 						continue
 
 					except asyncio.exceptions.CancelledError:
+						print("GOT CancelledError")
 						do_ping = True
 						continue
 					except Exception as e:
