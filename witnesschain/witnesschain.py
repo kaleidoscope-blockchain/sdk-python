@@ -53,6 +53,8 @@ class TransactionTracer:
 		self.keyType		= args["keyType"]
 		self.currentlyWatching	= "-"
 
+		self.extra_headers	= "NA"
+
 		if self.role == "watchtower":
 			self.currentlyWatching = args["currentlyWatching"]
 	#
@@ -87,7 +89,6 @@ class TransactionTracer:
 
 		cookies	= s.cookies.get_dict()
 		self.extra_headers = {"cookie" : ";".join(["%s=%s" %(i, j) for i, j in cookies.items()]) }
-
 		data = json.dumps ({
 			"signature" : "0\x43x61e71cbc2ca29fc9c185071301f1d325bcdbbcf24036797bf4263fc0d87b4d2c31dbec44d06305627bc0bb17dd6a56b275a94f188f6f4b5efe7016fbc68ba6e11c"
 		})
@@ -179,7 +180,7 @@ class TransactionTracer:
 					headers = CONTENT_TYPE_JSON
 				)
 
-			print("\n===>",r.status_code,r.url,r.text)
+			print("\n===>",r.status_code,r.url)
 
 			if r.status_code == 200:
 				print("====> After",i,"attempts\n")
@@ -223,11 +224,9 @@ class TransactionTracer:
 					if do_ping:
 					#
 						try:
-							print("Sending ping ...");
 							await websocket.send("ping")
-							print("Sent ping ...");
 						except Exception as e:
-							print("Got exception ",e)
+							print("===> EXCEPTION ",e)
 							break
 					#
 					msg= None
@@ -235,18 +234,18 @@ class TransactionTracer:
 					try:
 						async with async_timeout.timeout(30):
 							msg = await websocket.recv()
-							print("GOT MESSAGE===================>",msg)
+							print("---> MESSAGE",msg)
 					except asyncio.exceptions.TimeoutError:
 						do_ping = True
-						print("GOT timeoutException")
+						print("===> EXCEPTION : timeout")
 						continue
 
 					except asyncio.exceptions.CancelledError:
-						print("GOT CancelledError")
+						print("===> EXCEPTION : Cancelled")
 						do_ping = True
 						continue
 					except Exception as e:
-						print("GOT some exception",e)
+						print("===> EXCEPTION :",e)
 						break
 
 					if msg == "ping" or msg == "pong":
@@ -256,7 +255,7 @@ class TransactionTracer:
 					try:
 						msg = json.loads(msg)
 					except:
-						print("Message was not json",msg)
+						print("===> Message was not json",msg)
 						continue 
 					
 					if self.role == "app":
