@@ -135,7 +135,6 @@ class TransactionTracer:
 		cookies	= s.cookies.get_dict()
 		self.extra_headers = {"cookie" : ";".join(["%s=%s" %(i, j) for i, j in cookies.items()]) }
 
-		print(self.extra_headers)
 		return True
 	#
 
@@ -183,15 +182,14 @@ class TransactionTracer:
 			print("\n===>",r.status_code,r.url)
 
 			if r.status_code == 200:
-				print("====> After",i,"attempts\n")
+				print("===> After",i,"attempts\n")
 				break
-			if r.status_code == 202:
-				print("====> Retry",i,"\n")
+			elif r.status_code == 202:
+				print("===> Retry",i,"\n")
 				continue	
 			else:
 				self.session = None
 				break
-
 		# }
 
 		j	= json.loads(r.text.encode())
@@ -234,10 +232,9 @@ class TransactionTracer:
 					try:
 						async with async_timeout.timeout(30):
 							msg = await websocket.recv()
-							print("---> MESSAGE",msg)
 					except asyncio.exceptions.TimeoutError:
 						do_ping = True
-						print("===> EXCEPTION : timeout")
+						print("===> 30s Timeout")
 						continue
 
 					except asyncio.exceptions.CancelledError:
@@ -274,8 +271,6 @@ class TransactionTracer:
 
 	async def handle_message_as_watchtower (self, msg):
 	#
-		print("Got",msg);
-
 		chainId		= msg["chainId"]
 		requestId	= msg["requestId"]
 		transactionHash	= msg["transactionHash"]
@@ -311,10 +306,11 @@ class TransactionTracer:
 			})
 		)
 
+		print("Sent response for => ",transactionHash)
+
 		try:
 			async with async_timeout.timeout(30):
 				response = await self.websocket.recv()
-				print("GOT RESPONSE",response)
 		except Exception as e:
 			print("GOT some exception",e)
 

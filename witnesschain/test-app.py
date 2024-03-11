@@ -21,13 +21,11 @@ for i in range(0,1000):
 	if t.session == None:
 		break
 
-	print("Doing ",i,transactionHash)
+	print("\nTracing ... [",i,"]",transactionHash)
 
 	r = t.trace ({
 		"requestId"		: "EEEE",
-		"chainId"		: "84532",
+		"chainId"		: "999",
 		"transactionHash"	: transactionHash,
 	})
 #
-
-print(r)
