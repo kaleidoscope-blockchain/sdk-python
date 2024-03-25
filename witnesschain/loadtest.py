@@ -18,12 +18,11 @@ class AppUser(HttpUser):
 		t = witnesschain.TransactionTracer ({
 			"role"		: "app",
 			"keyType"	: "ethereum",
-			"privateKey": "ed9f0b916c7017e4d51edac23c79f5c3cc08107993cce093761e8c52f67e861f"
+			"privateKey"	: "ed9f0b916c7017e4d51edac23c79f5c3cc08107993cce093761e8c52f67e861f"
 		})
 
 		t.login()
 		self.cookie = t.extra_headers['cookie']
-		print("GOGOOOT",self.cookie)
 
 	@task
 	def trace(self):
