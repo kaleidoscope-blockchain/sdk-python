@@ -7,7 +7,7 @@ async def main():
 	t = witnesschain.TransactionTracer ({
 		"role"			: "watchtower",
 		"keyType"		: "ethereum",
-		"publicKey"		: "0xf30391b032F444cB40B3603b579064817f312353",
+		"privateKey"		: "ed9f0b916c7017e4d51edac23c79f5c3cc08107993cce093761e8c52f67e861f",
 		#"currentlyWatching"	: "999"
 		"currentlyWatching"	: "84532"
 	})

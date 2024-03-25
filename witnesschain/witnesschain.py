@@ -111,8 +111,6 @@ class TransactionTracer:
 			headers = CONTENT_TYPE_JSON
 		)
 
-		cookies	= s.cookies.get_dict()
-
 		if r.status_code == 200:
 			print("\n===>",r.status_code,r.url)
 		else:
@@ -337,7 +335,7 @@ class TransactionTracer:
 				"chainId"		: chainId,
 				"transactionHash"	: transactionHash,
 				"result"		: result,
-				"signature"		: "test-signature"
+				"signature"		: self.sign(result) 
 			})
 		)
 
