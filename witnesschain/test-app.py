@@ -5,7 +5,7 @@ import witnesschain
 t = witnesschain.TransactionTracer ({
 	"role"		: "app",
 	"keyType"	: "ethereum",
-	"publicKey"	: "0x66607777666999966472aD1BdD5425dC9Cd34376"
+	"privateKey"	: "ed9f0b916c7017e4d51edac23c79f5c3cc08107993cce093761e8c52f67e861f"
 })
 
 t.login()
@@ -25,7 +25,9 @@ for i in range(0,1000):
 
 	r = t.trace ({
 		"requestId"		: "EEEE",
-		"chainId"		: "999",
+		"chainId"		: "84532",
+		#"chainId"		: "11155420",
+		#"chainId"		: "999",
 		"transactionHash"	: transactionHash,
 	})
 #

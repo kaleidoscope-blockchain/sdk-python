@@ -17,23 +17,27 @@ import subprocess
 import async_timeout
 from calendar import timegm
 
+from eth_account import Account
+from eth_account.messages import encode_defunct
+
 HOME		= os.path.expanduser("~")
 
 SERVER		= "api.witnesschain.com"
 SERVER_PORT	= "443"
 
-API		= "/<role>/tracer"
-API_VERSION	= "/v1"
-BASE_URL	= "https://" + SERVER + ":" + SERVER_PORT + API + API_VERSION
-BASE_URL_WSS	= "wss://"   + SERVER + ":" + SERVER_PORT + API + API_VERSION
+API_VERSION	= "v1"
+API		= "/tracer/" + API_VERSION + "/<role>"
+BASE_URL	= "https://" + SERVER + ":" + SERVER_PORT + API
+BASE_URL_WSS	= "wss://"   + SERVER + ":" + SERVER_PORT + API
 
 LOGIN_URL	= BASE_URL + "/login"
 LOGOUT_URL	= BASE_URL + "/logout"
 PRE_LOGIN_URL	= BASE_URL + "/pre-login"
 TRACE_URL	= BASE_URL + "/trace"
+USER_INFO_URL	= BASE_URL + "/user-info" 
+
 WEBSOCKET_URL	= BASE_URL_WSS + "/websocket"
 
-USER_INFO_URL	= "https://" + SERVER + ":" + SERVER_PORT + "/all/general/v1/user-info" 
 
 CONTENT_TYPE_JSON = {
 	"content-type" : "application/json"
@@ -49,7 +53,10 @@ class TransactionTracer:
 		self.websocket		= None
 
 		self.role		= args["role"] 
-		self.publicKey		= args["publicKey"] 
+		self.privateKey		= args["privateKey"]
+		self.account		= Account.from_key(self.privateKey)
+		self.publicKey		= self.account.address
+
 		self.keyType		= args["keyType"]
 		self.currentlyWatching	= "-"
 
@@ -76,6 +83,8 @@ class TransactionTracer:
 			headers = CONTENT_TYPE_JSON
 		)
 
+		cookies	= s.cookies.get_dict()
+
 		if r.status_code == 200:
 			print("\n===>",r.status_code,r.url)
 		else:
@@ -89,9 +98,11 @@ class TransactionTracer:
 
 		cookies	= s.cookies.get_dict()
 		self.extra_headers = {"cookie" : ";".join(["%s=%s" %(i, j) for i, j in cookies.items()]) }
+
 		data = json.dumps ({
-			"signature" : "0\x43x61e71cbc2ca29fc9c185071301f1d325bcdbbcf24036797bf4263fc0d87b4d2c31dbec44d06305627bc0bb17dd6a56b275a94f188f6f4b5efe7016fbc68ba6e11c"
+			"signature" : self.sign(message) 
 		})
+
 
 		r = s.post (
 			url	= LOGIN_URL.replace("<role>",self.role),
@@ -99,6 +110,8 @@ class TransactionTracer:
 			data	= data,
 			headers = CONTENT_TYPE_JSON
 		)
+
+		cookies	= s.cookies.get_dict()
 
 		if r.status_code == 200:
 			print("\n===>",r.status_code,r.url)
@@ -113,7 +126,7 @@ class TransactionTracer:
 
 		#"""
 		r = s.post (
-			url	= USER_INFO_URL,
+			url	= USER_INFO_URL.replace("<role>",self.role),
 			verify	=
  SSL_CONTEXT.check_hostname,
 			data	= data,
@@ -138,6 +151,30 @@ class TransactionTracer:
 		return True
 	#
 
+	def sign (self,message):
+        #
+		message_hash = encode_defunct(text=message)
+
+		s = Account.sign_message(message_hash, self.privateKey)
+
+		return s.signature.hex()
+        #
+
+	def sign_as_json(self,message):
+        #
+		message_hash = encode_defunct(text=message)
+
+		s = Account.sign_message(message_hash, self.privateKey)
+
+		return json.dumps ({
+			"role"              : self.role,
+			"message"           : message.decode(),
+			"keyType"           : self.keyType,
+			"publicKey"         : self.publicKey,
+			"signature"         : s.signature.hex()
+		})
+        #
+
 	async def logout (self,websocket):
 	#
 		await websocket.close()
@@ -147,8 +184,6 @@ class TransactionTracer:
 			verify	= SSL_CONTEXT.check_hostname,
 			headers	= CONTENT_TYPE_JSON
 		)
-
-		print("\n===>",r.status_code,r.url)
 
 		if r.status_code == 200:
 			print("\n===>",r.status_code,r.url)
@@ -179,7 +214,6 @@ class TransactionTracer:
 					headers = CONTENT_TYPE_JSON
 				)
 
-			print("\n===>",r.status_code,r.url)
 
 			if r.status_code == 200:
 				print("===> After",i,"attempts\n")
@@ -188,6 +222,7 @@ class TransactionTracer:
 				print("===> Retry",i,"\n")
 				continue	
 			else:
+				print("\n===>",r.status_code,r.url,r.text)
 				self.session = None
 				break
 		# }
