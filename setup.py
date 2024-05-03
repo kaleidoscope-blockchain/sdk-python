@@ -7,7 +7,7 @@ setup (
 	author_email		= "x@example.com",
 	description		= "A short description of your package",
 	packages		= find_packages(),
-	install_requires	= ["requests", "json"],
+	install_requires	= ["requests"],
 	classifiers		= [
 		"Programming Language :: Python :: 3",
 		"License :: OSI Approved :: MIT License",
