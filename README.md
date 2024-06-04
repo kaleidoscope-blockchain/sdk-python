@@ -3,8 +3,6 @@
 This is the client to access the transaction tracer APIs.
 
 ```
-import random
-
 import witnesschain
 
 t = witnesschain.TransactionTracer ({
