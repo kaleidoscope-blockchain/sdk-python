@@ -2,6 +2,28 @@
 
 This is the client to access the transaction tracer APIs.
 
+```
+import random
+
+import witnesschain
+
+t = witnesschain.TransactionTracer ({
+	"role"		    : "app",
+	"keyType"	    : "ethereum",
+	"privateKey"	: "ed9f0b916c7017e4d51edac23c79f5c3cc08107993cce093761e8c52f67e861f"
+})
+
+t.login()
+
+transactionHash = "0x...."
+
+r = t.trace ({
+		"requestId"		    : "EEEE",
+		"chainId"		    : "84532",
+		"transactionHash"	: transactionHash
+})
+```
+
 # Transaction tracer flow
 
 ## Flow
