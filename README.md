@@ -16,8 +16,8 @@ t.login()
 transactionHash = "0x...."
 
 r = t.trace ({
-		"requestId"		    : "EEEE",
-		"chainId"		    : "84532",
+		"requestId"		: "myReqId",
+		"chainId"		: "84532",
 		"transactionHash"	: transactionHash
 })
 ```
